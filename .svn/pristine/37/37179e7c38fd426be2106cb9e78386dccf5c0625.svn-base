@@ -1,0 +1,17 @@
+package com.startinpoint.ssreport.dao;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+import com.startinpoint.ssreport.entity.SSReport;
+
+public interface SSReportDao {
+	
+	public List<SSReport> getData();
+	
+	public List<Timestamp> getReportMonthsForCalculation();
+	
+	public List<String> nonWorkingDay();
+	
+	public int getFilteredCount(SSReport ssReport);
+}

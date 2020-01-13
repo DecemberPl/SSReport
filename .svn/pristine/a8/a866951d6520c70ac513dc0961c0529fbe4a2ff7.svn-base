@@ -1,0 +1,148 @@
+package com.startinpoint.ssreport.daoImpl;
+
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import org.apache.log4j.Logger;
+import com.startinpoint.ssreport.dao.SSReportDao;
+import com.startinpoint.ssreport.main.Constants;
+import com.startinpoint.ssreport.main.ReadPropertiesFile;
+import com.startinpoint.ssreport.service.DB2Connection;
+import com.startinpoint.ssreport.entity.SSReport;
+
+public class SSReportDaoImpl implements SSReportDao{
+	private Logger debugLog = Logger.getLogger("debug.logger");
+	private static Logger errorLog = Logger.getLogger("error.logger");
+	DB2Connection db2Connection;
+	List<SSReport> ssReportList=new ArrayList<>();
+	SSReport ssReport;
+	
+	@Override
+	public List<Timestamp> getReportMonthsForCalculation() {
+		String reportmonthLength=ReadPropertiesFile.REPORTMONTH;
+		Calendar cal=Calendar.getInstance();
+    	Date date=new Date();
+		cal.setTime(date);
+		cal.add(Calendar.MONTH, -Integer.parseInt(reportmonthLength));
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		Date startDate=cal.getTime();
+		Calendar c=Calendar.getInstance();
+		Date d=new Date();
+		c.setTime(d);
+		c.add(Calendar.MONTH, -1);
+		c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+		c.set(Calendar.HOUR_OF_DAY, 23);
+	    c.set(Calendar.MINUTE, 59);
+	    c.set(Calendar.SECOND, 59);
+	    c.set(Calendar.MILLISECOND, 999);
+		Date endDate=c.getTime();
+		Timestamp ts=new Timestamp(date.getTime());  
+        System.out.println("Today Date (Timestamp): "+ts);
+        debugLog.debug("Today Date (Timestamp): "+ts);
+        Timestamp ts1=new Timestamp(startDate.getTime());  
+        System.out.println("Start Date (Timestamp): "+ts1);
+        debugLog.debug("Start Date (Timestamp): "+ts1);
+        Timestamp ts2=new Timestamp(endDate.getTime());
+        System.out.println("End Date (Timestamp): "+ts2);
+        debugLog.debug("End Date (Timestamp): "+ts2);
+        List<Timestamp> timestampList=new ArrayList<Timestamp>();
+        timestampList.add(ts);
+        timestampList.add(ts1);
+        timestampList.add(ts2);
+        return timestampList;
+	}
+	@Override
+	public List<SSReport> getData() {
+		try(Connection con=db2Connection.getInstance().getConnection()){			
+		 List<Timestamp> tsList=new ArrayList<Timestamp>(3);
+		 tsList=getReportMonthsForCalculation();
+		 Timestamp tsStart=tsList.get(1);
+		 Timestamp tsEnd=tsList.get(2);//convertStringToTimestamp("2019-01-03 09:49:39.567", "yyyy-MM-dd HH:mm:ss.SSS");
+		 String sql="SELECT "+Constants.reportNameDB+", "+Constants.SSUserDB+", "+Constants.dateStartDB+", "+Constants.dateEndDB+", "+Constants.ssCategoryDB
+				+" FROM "+ReadPropertiesFile.USERNAME+"."+ReadPropertiesFile.VIEWNAME+" WHERE "+Constants.timestampForSSReportDB+">='"+tsStart+"' AND "+Constants.timestampForSSReportDB+"<='"+tsEnd+"'";
+		 //for sql db
+		 /*String sql="SELECT "+Constants.reportNameDB+", "+Constants.SSUserDB+", "+Constants.dateStartDB+", "+Constants.dateEndDB+", "+Constants.ssCategoryDB
+					+" FROM "+ReadPropertiesFile.VIEWNAME+" WHERE "+Constants.timestampForSSReportDB+">='"+tsStart+"' AND "+Constants.timestampForSSReportDB+"<='"+tsEnd+"'";*/
+		 System.out.println(sql);
+		 debugLog.debug("sql statement for SSReport : "+sql);
+		 Statement statement=con.createStatement();
+		 ResultSet rs=statement.executeQuery(sql);
+		 while(rs.next()){
+			 ssReport=new SSReport();
+			 ssReport.setReportName(rs.getString(Constants.reportNameDB));
+			 ssReport.setSssId(rs.getString(Constants.SSUserDB));
+			 ssReport.setSssStart(rs.getString(Constants.dateStartDB));
+			 ssReport.setSssComplete(rs.getString(Constants.dateEndDB));
+			 ssReport.setCategory(rs.getString(Constants.ssCategoryDB));
+			 System.out.println("Each SSReport"+ssReport.toString());
+			 debugLog.debug("Each SSReport"+ssReport.toString());
+			 ssReportList.add(ssReport);
+		 }
+		 System.out.println("ssReportList after sql: "+ssReportList);
+		 debugLog.debug("ssReportList after sql: "+ssReportList);
+		}catch(SQLException e){
+			e.printStackTrace();
+			errorLog.error("Failed DB2 Connection or SQLException");
+			System.exit(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			errorLog.error("Failed DB2 Connection Exception");
+			System.exit(0);
+		}
+		return ssReportList;
+	}
+	
+	public static Timestamp convertStringToTimestamp(String str_date, String pattern) {
+        try {
+
+            SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+            Date date = formatter.parse(str_date);
+            java.sql.Timestamp timeStampDate = new Timestamp(date.getTime());
+            return timeStampDate;
+
+        } catch (ParseException e) {
+            System.out.println("Exception :" + e);
+            errorLog.error("Timestamp Parse Exception");
+            return null;
+        }
+    }
+	
+	@Override
+	public int nonWorkingDay(SSReport ss){
+		int countOfNonWorkingDay = 0;
+		Timestamp sDate=convertStringToTimestamp(ss.getSssStart(),"yyyy-MM-dd HH:mm:ss.SSS");
+		Timestamp eDate=convertStringToTimestamp(ss.getSssComplete(),"yyyy-MM-dd HH:mm:ss.SSS");
+		try(Connection con=db2Connection.getInstance().getConnection()){
+		 //String sql="SELECT COUNT(*) FROM "+ReadPropertiesFile.NONWORKINGTABLENAME+" WHERE "+Constants.date+">='"+sDate+"' AND "+Constants.date+"<='"+eDate+"'";
+		 String sql="SELECT COUNT(*) FROM "+ReadPropertiesFile.USERNAME+"."+ReadPropertiesFile.NONWORKINGTABLENAME+" WHERE TIMESTAMP_FORMAT("+'"'+Constants.date+'"'+",'YYYYMMDD')>='"+sDate+"' AND TIMESTAMP_FORMAT("+'"'+Constants.date+'"'+",'YYYYMMDD')<='"+eDate+"'";
+
+		 Statement statement=con.createStatement();
+		 ResultSet rs=statement.executeQuery(sql);
+		 while ( rs.next())
+		 {
+			 countOfNonWorkingDay = rs.getInt("1"); //COUNT(*) for sqldb
+		      
+		 }
+		 System.out.println("Number of Non Working Days: "+countOfNonWorkingDay);
+		 debugLog.debug("Number of Non Working Days: "+countOfNonWorkingDay);
+		}catch(SQLException e){
+			e.printStackTrace();
+			errorLog.error("Failed DB2 Connection or SQLException");
+			System.exit(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			errorLog.error("Failed DB2 Connection Exception");
+			System.exit(0);
+		}
+		return countOfNonWorkingDay;
+		
+	}
+}

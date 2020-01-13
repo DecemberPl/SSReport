@@ -1,0 +1,56 @@
+Note:
+SSReport Overview
+
+	 1)	The main purpose of this program is to send mail to the user with the generated excel report as attachment.
+	
+	 2) the user can define the total amount of month desired to report in the config.properties . 
+		E.g current month is Jan 2020 and defined total month is 3 , 
+			the report will generate for previous 3 months Dec ,Nov and Oct 2019.
+			
+	 3) the user can also define the format of date time columns for report excel, subject and content with the HTML format for email in the config.properties.
+	 
+	 4) for duration column, it is only count the working days.
+	 
+	 5) the name of report excel and temporary location to save the generated excel also can configure in the config.properties.
+	 
+	 6) the excel in the temporary location will be deleted when the program run next time.
+	 
+	 7) for the detail of config.propeties it can reference the "Documentation for SSReport Properties.docx".
+	 
+	 8) if the program not working properly it can see the error.log in the 'log' folder at the same directory level of SSReport.exe.
+	 
+
+Initial Setup for config.properties (in Properties Folder)
+#for database
+database.url=jdbc:db2://192.168.3.127:50000/PDWDB:currentSchema=PDWDB;
+database.driver=com.ibm.db2.jcc.DB2Driver
+database.username=db2admin
+database.password=NZPJPCOcM+QE9KjbIpH8PQ==
+database.schema=PDWDB
+database.viewname=SSREPORT
+database.nonworkingTable=NONWORKINGDAYS_TBL
+This is the database setting to connect DB2 Server.
+
+#for file
+tempfilepath=define your desired location to export excel file (Have to manually create new folder E.g. C:\\Users\\James\\Document\\SSReportExcel)
+filename=give your desired file name for excel(The system will export excel like SSREPORT.xlsx)
+
+#for email
+email.toMail=to mail address you want to send
+email.from=your mail address
+email.username=your mail address username
+email.password=your mail address password (It must be encrypted value)
+email.host=your mail host
+email.port=your mail port
+email.subject=define your mail subject
+email.content=define your mail title (It will appear as large title in your mail content)
+
+#Log4j
+scan_log4jFilePath=/properties/log4j_config.properties
+
+#format
+duration=dd HH:mm (the desired format for 'Duration' column of excel E.g. you can change this like dd:HH:mm)
+reportdateformat=ddMMYYYY (the desired format for 'Report Date' column of excel E.g. you can change this like YYYYMMdd)
+reporttimeformat=hh:mm (the desired format for 'Report Time' column of excel E.g. you can change this like HH:mm)
+reportmonth=11 (this is the report month duration which will be counted backward from last month)
+E.g. your current month is December and when you define 2, the system will retrieve and report between November and October)

@@ -1,0 +1,23 @@
+#for database
+servername=192.168.3.127
+username=db2admin
+password=NZPJPCOcM+QE9KjbIpH8PQ==
+databasename=PDWDB
+viewname=SSREPORT
+nonworkingTable=NONWORKINGDAYS_TBL
+
+#for email
+email.toMail=kyarphyunaing1994@gmail.com
+email.from=qarah5.sip@gmail.com
+email.username=qarah5
+email.password=NZPJPCOcM+QE9KjbIpH8PQ==
+email.host=smtp.gmail.com
+
+#for file
+tempfilepath=C:\\Users\\KyarPhyuNaing\\Music\\temp
+filename=ssreport
+#format
+duration=dd HH:mm
+reportdateformat=ddMMYYYY
+reporttimeformat=hh:mm
+reportmonth=11

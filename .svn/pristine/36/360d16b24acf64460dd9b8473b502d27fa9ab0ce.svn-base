@@ -1,0 +1,20 @@
+package com.startinpoint.ssreport.main;
+
+public class Constants {
+ public static final String reportNameDB="FILENAME";
+ public static final String SSUserDB="SSUSER";
+ public static final String dateStartDB="DATESTART";
+ public static final String dateEndDB="DATEEND";
+ public static final String ssCategoryDB="SSCATEGORY";
+ public static final String timestampForSSReportDB="TIME_STAMP";
+ public static final String reportName="Report Name";
+ public static final String reportDate="Report Date";
+ public static final String reportTime="Report Time";
+ public static final String sssID="SSS ID";
+ public static final String sssStart="SSS Start";
+ public static final String sssComplete="SSS Complete";
+ public static final String duration="Duration";
+ public static final String category="Category";
+ public static final String remarks="Remarks";
+ public static final String date="DATE";
+}

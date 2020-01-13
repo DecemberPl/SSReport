@@ -1,0 +1,5 @@
+package com.startinpoint.ssreport.service;
+
+public interface SendEmailService {
+	public void sendMail(String toMail,String from,String password,String host,String port,String filename,String folderpath,String subject,String content);
+}

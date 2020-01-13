@@ -1,0 +1,16 @@
+#for database
+servername=192.168.3.127
+username=db2admin
+password=P@ger123
+databasename=PDWDB
+viewname=SSREPORT
+#for email
+
+#for file
+tempfilepath=C:\\Users\\KyarPhyuNaing\\Music\\temp
+filename=ssreport
+#format
+duration=dd hh:mm
+reportdateformat=ddMMYYYY
+reporttimeformat=hh:mm
+reportmonth=1

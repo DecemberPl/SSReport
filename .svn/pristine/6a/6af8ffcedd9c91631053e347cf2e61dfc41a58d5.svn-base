@@ -1,0 +1,61 @@
+package com.startinpoint.ssreport.main;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class ReadPropertiesFile {
+	static Properties prop = null;
+	static String fileName = null;
+	static InputStream input = null;
+	public static boolean isInitialized = false;
+	
+	public static Properties initialAppConfig(){
+		if(prop == null){
+			
+			try {
+				
+				prop = new Properties();
+				
+				prop.load(ReadPropertiesFile.class.getClassLoader().getResourceAsStream("config.properties"));
+				fileName = "config.properties";
+			
+				input = ReadPropertiesFile.class.getClassLoader().getResourceAsStream(fileName);
+				System.out.println(input);
+				if(input != null){
+					prop.load(input);
+				}else{
+					throw new FileNotFoundException("Properties File '" + fileName +"' is not found in the classpath");
+				}
+				
+				if(isInitialized){
+					return null;
+				}
+				else{
+					isInitialized = true;
+				}
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (Exception e){ 
+				e.printStackTrace();
+			}
+			finally{
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return prop;
+		
+		
+	}
+	public static void main(String args[]){
+	Properties p=new Properties();
+	p=initialAppConfig();
+	System.out.println(p.toString());
+	}
+}

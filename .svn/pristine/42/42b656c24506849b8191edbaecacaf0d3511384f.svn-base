@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SSReport" default="SSReport" basedir=".">
+	<property name="appname" value="SSReport"/>
+	<property name="base" value="."/>
+	<property name="lib.dir" value="${base}/lib"/>
+	<property name="src" value="${base}/src/"/>
+	<property name="build" value="${base}/bin"/>
+	<property name="dist" value="${base}/dist"/>
+	
+    <target name="SSReport">
+    	<echo>${appname}</echo>
+      	<delete file="${dist}/${appname}.jar"/>
+        
+        <jar jarfile="${dist}/${appname}.jar">
+        	  <manifest>
+        	    <attribute name="Main-Class" value="com.startinpoint.ssreport.main"/>
+        	  	
+        	  </manifest>
+        	<fileset dir="${build}">
+    			<patternset id="classes" >    				
+    				<include name="com/startinpoint/ssreport/dao/*"/>
+    				<include name="com/startinpoint/ssreport/daoImpl/*"/>
+    				<include name="com/startinpoint/ssreport/entity/*"/>
+    				<include name="com/startinpoint/ssreport/main/*"/>
+    				<include name="com/startinpoint/ssreport/service/*"/>
+    				<include name="com/startinpoint/ssreport/serviceImpl/*"/>
+    			</patternset>        		
+        	</fileset>
+        	
+        </jar>
+    </target>	
+
+</project>

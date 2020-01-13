@@ -1,0 +1,46 @@
+package com.startinpoint.ssreport.daoImpl;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Properties;
+import com.startinpoint.ssreport.dao.SSReportDao;
+import com.startinpoint.ssreport.main.Constants;
+import com.startinpoint.ssreport.main.ReadPropertiesFile;
+import com.startinpoint.ssreport.service.DB2Connection;
+import com.startinpoint.ssreport.entity.SSReport;
+
+public class SSReportDaoImpl implements SSReportDao{
+
+	DB2Connection db2Connection;
+	Properties p=ReadPropertiesFile.initialAppConfig();
+	List<SSReport> ssReportList=new ArrayList<>();	
+
+	@Override
+	public List<SSReport> getData() {
+		try(Connection con=db2Connection.getInstance().getConnection()){
+			SSReport ssReport;
+		 int lastmonth=Calendar.getInstance().get(Calendar.MONTH);
+		 String sql="SELECT "+Constants.reportNameDB+", "+Constants.SSUserDB+", "+Constants.dateStartDB+", "+Constants.dateEndDB+", "+Constants.ssCategoryDB
+				+" FROM "+p.getProperty("username")+"."+p.getProperty("viewname")+" WHERE MONTH("+Constants.timestampForSSReportDB+")=12";//+lastmonth
+		 System.out.println(sql);
+		 Statement statement=con.createStatement();
+		 ResultSet rs=statement.executeQuery(sql);
+		 while(rs.next()){
+			 ssReport=new SSReport();
+			 ssReport.setReportName(rs.getString(Constants.reportNameDB));
+			 ssReport.setSssId(rs.getString(Constants.SSUserDB));
+			 ssReport.setSssStart(rs.getString(Constants.dateStartDB));
+			 ssReport.setSssComplete(rs.getString(Constants.dateEndDB));
+			 ssReport.setCategory(rs.getString(Constants.ssCategoryDB));
+			 ssReportList.add(ssReport);
+			 System.out.println("Each SSReport"+ssReport.toString());
+		 }System.out.println("ssReportList: "+ssReportList);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return ssReportList;
+	}
+	
+}

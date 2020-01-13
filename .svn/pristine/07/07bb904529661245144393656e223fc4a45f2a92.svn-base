@@ -1,0 +1,52 @@
+package com.startinpoint.ssreport.serviceImpl;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import com.startinpoint.ssreport.entity.SSReport;
+import com.startinpoint.ssreport.main.Constants;
+import com.startinpoint.ssreport.service.ExportExcelReportService;
+
+public class ExportExcelReportServiceImpl implements ExportExcelReportService{
+	private static String[] columns={Constants.reportName,Constants.reportDate,Constants.reportTime,Constants.sssID,Constants.sssStart,
+			Constants.sssComplete,Constants.duration,Constants.category,Constants.remarks};
+	@Override
+	public String exportExcel(String filepath, String filename, List<SSReport> ssList) throws IOException {
+		// Create a Workbook
+        Workbook workbook = new XSSFWorkbook();
+        // Create a Sheet
+        Sheet sheet = workbook.createSheet(filename);
+        // Create a Row
+        Row headerRow = sheet.createRow(0);
+        // Create cells
+        for(int i = 0; i < columns.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(columns[i]);
+        }
+        int rowNum = 1;
+        for(SSReport ss: ssList) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(ss.getReportName());
+            row.createCell(1).setCellValue(ss.getReportDate());
+            row.createCell(2).setCellValue(ss.getReportTime());
+            row.createCell(3).setCellValue(ss.getSssId());
+            row.createCell(4).setCellValue(ss.getSssStart());
+            row.createCell(5).setCellValue(ss.getSssComplete());
+            row.createCell(6).setCellValue(ss.getDuration());
+            row.createCell(7).setCellValue(ss.getCategory());
+            row.createCell(8).setCellValue(ss.getRemarks());
+        }
+     // Resize all columns to fit the content size
+        for(int i = 0; i < columns.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+        // Write the output to a file
+        FileOutputStream fileOut = new FileOutputStream(filepath+"\\"+filename+".xlsx");
+        workbook.write(fileOut);
+        fileOut.close();
+        // Closing the workbook
+        //workbook.close();
+		return "Sucessfully exported excel";
+    }
+}

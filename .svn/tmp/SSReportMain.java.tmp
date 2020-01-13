@@ -1,0 +1,34 @@
+package com.startinpoint.ssreport.main;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import com.startinpoint.ssreport.dao.SSReportDao;
+import com.startinpoint.ssreport.daoImpl.SSReportDaoImpl;
+import com.startinpoint.ssreport.entity.SSReport;
+import com.startinpoint.ssreport.service.DB2Connection;
+import com.startinpoint.ssreport.service.ExportExcelReportService;
+import com.startinpoint.ssreport.serviceImpl.ExportExcelReportServiceImpl;
+public class SSReportMain {
+
+	public static void main(String[] args) throws SQLException, IOException {
+		String workingDir = System.getProperty("user.dir");		
+		System.out.println("in ssreport main"+workingDir);
+		Properties p=ReadPropertiesFile.initialAppConfig();
+		//to get Connection
+		Connection  con = DB2Connection.getInstance().getConnection();
+		//to get DB2 Data
+		SSReportDao ss=new SSReportDaoImpl();
+		//System.out.println("getData in Main: "+ss.getData());
+		//to edit in order to export data
+		ExportExcelReportService exportExcel=new ExportExcelReportServiceImpl();
+		List<SSReport> prepareList=new ArrayList<SSReport>();
+		prepareList=(List<SSReport>) exportExcel.PrepareDataToWrite(ss.getData());
+		//to export excel sheet
+		System.out.println("Export Condition"+exportExcel.exportExcel(p.getProperty("tempfilepath"), p.getProperty("filename"),prepareList ));
+		System.out.println(con.isClosed());
+	}
+}

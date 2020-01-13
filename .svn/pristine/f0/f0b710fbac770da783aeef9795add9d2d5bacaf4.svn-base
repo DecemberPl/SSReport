@@ -1,0 +1,197 @@
+package com.startinpoint.ssreport.serviceImpl;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.Format;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import com.startinpoint.ssreport.dao.SSReportDao;
+import com.startinpoint.ssreport.daoImpl.SSReportDaoImpl;
+import com.startinpoint.ssreport.entity.SSReport;
+import com.startinpoint.ssreport.main.Constants;
+import com.startinpoint.ssreport.main.ReadPropertiesFile;
+import com.startinpoint.ssreport.service.ExportExcelReportService;
+
+public class ExportExcelReportServiceImpl implements ExportExcelReportService{
+	SSReport ssReport=new SSReport();
+	public SSReport CalculateData(SSReport ss) {
+		String filename=ss.getReportName();
+			//prepare time and date
+		String removepdf=filename.split("\\.")[0];
+		String time=removepdf.substring(removepdf.lastIndexOf('_') + 1);
+		String date=removepdf.substring(removepdf.lastIndexOf('_') -8,removepdf.lastIndexOf('_'));
+		System.out.println(removepdf);
+		date=changeUserdefinedFormatForDateTime(Constants.formatForReportDate,ReadPropertiesFile.REPORTDATEFORMAT,date);
+		ss.setReportDate(date);//Set userdefined format date
+		time=changeUserdefinedFormatForDateTime(Constants.formatForReportTime,ReadPropertiesFile.REPORTTIMEFORMAT,time);
+		ss.setReportTime(time);//Set userdefined format time
+		//prepare duration
+		String dateStart = ss.getSssStart();
+		String dateStop = ss.getSssComplete();
+		System.out.println("start and end : "+dateStart+" "+dateStop);
+		if(ss.getSssStart()!=null && ss.getSssComplete()!=null) {
+			SSReportDao ssDAO=new SSReportDaoImpl();
+			 int nonWorkDays=ssDAO.nonWorkingDay(ss);
+			 ss.setNonWorkingDays(nonWorkDays);
+		 }
+		String calculatedDuration=calculateDuration(dateStart,dateStop,ss.getNonWorkingDays());
+		//System.out.println("calculatedDuration : "+calculatedDuration+" "+Constants.formatForReportDuration+" "+ReadPropertiesFile.DURATION);
+		DateTimeFormatter simpleCurrentFormat = DateTimeFormatter.ofPattern(Constants.formatForReportDuration);
+		DateTimeFormatter simpleUserFormat =  DateTimeFormatter.ofPattern(ReadPropertiesFile.DURATION);
+		calculatedDuration = simpleUserFormat.format(simpleCurrentFormat.parse(calculatedDuration));
+		ss.setDuration(calculatedDuration);
+		return ss;
+	}
+	public String calculateDuration(String dateStart,String dateStop,int nonWorkDays){
+
+		//HH converts hour in 24 hours format (0-23), day calculation
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		DateTimeFormatter simpleFormat =  DateTimeFormatter.ofPattern(Constants.formatForReportDuration);
+		String diffDateTime = null;
+		Date d1 = null;
+		Date d2 = null;
+		SSReportDao ss=new SSReportDaoImpl();
+		try {
+			d1 = format.parse(dateStart);
+			d2 = format.parse(dateStop);
+			
+			//in milliseconds
+			long diff = d2.getTime() - d1.getTime();
+
+			//String diffSeconds = Long.toString(diff / 1000 % 60);
+			String diffMinutes = Long.toString(diff / (60 * 1000) % 60);
+			String diffHours = Long.toString(diff / (60 * 60 * 1000) % 24);
+			String diffDays = Long.toString((diff / (24 * 60 * 60 * 1000))-Long.valueOf(nonWorkDays));
+			System.out.println("original calculated duration: "+diffDays+" "+diffHours+":"+diffMinutes);
+			diffDays=appendStringToFormat(diffDays);
+			diffHours=appendStringToFormat(diffHours);
+			diffMinutes=appendStringToFormat(diffMinutes);
+			diffDateTime=diffDays+" "+diffHours+":"+diffMinutes;
+			System.out.println("diffDateTime including (nonWorkingDay): "+diffDateTime);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return diffDateTime;
+	}
+	public String appendStringToFormat(String str){
+		String newString=new String();
+		if(str.length()==1){
+			newString="0"+str;
+		}
+		if(str.length()==2){
+			newString=str;
+		}
+		return newString;
+	}
+	public String changeUserdefinedFormatForDateTime(String currentFormat,String definedFormat,String current){
+		SimpleDateFormat simpleCurrentFormat = new SimpleDateFormat(currentFormat);
+		SimpleDateFormat simpleUserFormat = new SimpleDateFormat(definedFormat);
+		try {
+			current = simpleUserFormat.format(simpleCurrentFormat.parse(current));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//System.out.println("userdefined format date or time: " +current);
+		return current;
+		
+	}
+	public List<SSReport> PrepareDataToWrite(List<SSReport> ssList){
+		List<SSReport> prepareSSReportList=new ArrayList<SSReport>();
+		for(SSReport s:ssList){
+			SSReport prepareSSReport = null;
+			if(s.getReportName()!=null){
+			prepareSSReport=CalculateData(s);
+			prepareSSReportList.add(prepareSSReport);
+			}else{
+			prepareSSReport=s;
+			prepareSSReportList.add(prepareSSReport);
+			}
+			
+			System.out.println("Each EditedSSReport:"+prepareSSReport);
+		}
+		return prepareSSReportList;
+	}
+	private static String[] columns={Constants.reportName,Constants.reportDate,Constants.reportTime,Constants.sssID,Constants.sssStart,
+			Constants.sssComplete,Constants.duration,Constants.category,Constants.remarks};
+	@Override
+	public String exportExcel(String filepath, String filename, List<SSReport> ssList) throws IOException {
+		// Create a Workbook
+        Workbook workbook = new XSSFWorkbook();
+        // Create a Sheet
+        Sheet sheet = workbook.createSheet(filename);
+        // Create a Row
+        Row headerRow = sheet.createRow(0);
+        // Create cells
+        for(int i = 0; i < columns.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(columns[i]);
+        }
+        int rowNum = 1;
+        
+        for(SSReport ss: ssList) {
+        	if(!(ss==null)){
+        		Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(ss.getReportName());
+                row.createCell(1).setCellValue(ss.getReportDate());
+                row.createCell(2).setCellValue(ss.getReportTime());
+                row.createCell(3).setCellValue(ss.getSssId());
+                row.createCell(4).setCellValue(ss.getSssStart());
+                row.createCell(5).setCellValue(ss.getSssComplete());
+                row.createCell(6).setCellValue(ss.getDuration());
+                row.createCell(7).setCellValue(ss.getCategory());
+                row.createCell(8).setCellValue(ss.getRemarks());
+        	}  
+        }
+     // Resize all columns to fit the content size
+        for(int i = 0; i < columns.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+        boolean isRowEmpty = false;
+        for(int i = 0; i < sheet.getLastRowNum(); i++){
+            if(sheet.getRow(i)==null){
+                sheet.shiftRows(i + 1, sheet.getLastRowNum(), -1);
+                i--;
+            continue;
+            }
+            for(int j =0; j<sheet.getRow(i).getLastCellNum();j++){
+                if(sheet.getRow(i).getCell(j).toString().trim().equals("")){
+                    isRowEmpty=true;
+                }else {
+                    isRowEmpty=false;
+                    break;
+                }
+            }
+            if(isRowEmpty==true){
+                sheet.shiftRows(i + 1, sheet.getLastRowNum(), -1);
+                i--;
+            }
+        }
+        //Delete the old file if exist
+        fileDelete(filepath);
+        
+        // Write the output to a file
+        FileOutputStream fileOut = new FileOutputStream(filepath+"\\"+filename+".xlsx");
+        workbook.write(fileOut);
+        fileOut.close();
+        // Closing the workbook
+        //workbook.close();
+		return "Sucessfully exported excel";
+    }
+	
+	public void fileDelete(String filepath) {
+		File directory = new File(filepath);
+        File[] files = directory.listFiles();
+		for (File file : files) {
+			if(file.exists()) {
+			file.delete();
+		}
+		}
+	}
+}

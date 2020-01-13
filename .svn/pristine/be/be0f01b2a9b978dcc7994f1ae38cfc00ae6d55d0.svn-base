@@ -1,0 +1,29 @@
+#for database
+database.url=jdbc:db2://192.168.3.127:50000/PDWDB:currentSchema=PDWDB;
+database.driver=com.ibm.db2.jcc.DB2Driver
+database.username=db2admin
+database.password=NZPJPCOcM+QE9KjbIpH8PQ==
+database.schema=PDWDB
+database.viewname=SSREPORT
+database.nonworkingTable=NONWORKINGDAYS_TBL
+
+#for email
+email.toMail=kyarphyunaing1994@gmail.com
+email.from=qarah5.sip@gmail.com
+email.username=qarah5
+email.password=NZPJPCOcM+QE9KjbIpH8PQ==
+email.host=smtp.gmail.com
+email.port=25
+email.subject=SSReport
+email.content=<h3>Dear Sir/Mdm</h3><p>Here is SSReport with excel file attachment.</p><br>Thank you.<hr>
+#Log4j
+scan_log4jFilePath=/properties/log4j_config.properties
+
+#for file
+tempfilepath=C:\\Users\\KyarPhyuNaing\\Music\\temp
+filename=ssreport
+#format
+duration=dd HH:mm
+reportdateformat=ddMMYYYY
+reporttimeformat=hh:mm
+reportmonth=11

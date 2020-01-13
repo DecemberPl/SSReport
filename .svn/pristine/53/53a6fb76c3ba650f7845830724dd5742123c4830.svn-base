@@ -1,0 +1,27 @@
+#set the level of the root logger to DEBUG and set its appender as an appender named X
+
+log4j.category.debug.logger=DEBUG,debug,CONSOLE
+log4j.category.error.logger=ERROR,error,CONSOLE
+
+#log4j.rootLogger.org.apache.pdfbox.pdmodel.font.PDFont=fatal
+
+#define the appender name
+log4j.appender.debug=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.debug.File=log/scan_debug.log
+log4j.appender.debug.DatePattern='.'yyyy-MM-dd
+
+log4j.appender.error=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.error.File=log/scan_error.log
+log4j.appender.error.DatePattern='.'yyyy-MM-dd
+
+#set the layout for the appender 
+log4j.appender.debug.layout=org.apache.log4j.PatternLayout
+log4j.appender.debug.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %c{1}:%F:%L| %m%n
+
+log4j.appender.error.layout=org.apache.log4j.PatternLayout
+log4j.appender.error.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %c{1}:%F:%L| %m%n
+
+#define for console 
+log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
+log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p %c{1}:%F:%L| %m%n

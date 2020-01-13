@@ -1,0 +1,41 @@
+Note:
+SSReport Overview
+-the user have to define desired report month like last 2 month or last 3 month E.g you can define like '2' in reportmonth in config.properties
+-then, the result will be extracted concerned with the above defined month from database
+-after that, required columns will be calculated to export excel. 
+-for duration column, the nonworkingDays will be retrieved between DateStart and DateEnd for each excel row.
+-the outcoming nonworkingDays will be subtracted from Duration after calculating the difference of DateEnd and DateStart.
+-Besides the user can define desired date, time,and duration format for excel.
+-then, excel will be exported with desired filename and filepath.
+-finally, the exported excel will be attached and sent with desired email address including subject, content.
+
+
+Initial Setup for config.properties (in Properties Folder)
+#for database
+servername=192.168.3.127
+username=db2admin
+password=NZPJPCOcM+QE9KjbIpH8PQ==
+databasename=PDWDB
+viewname=SSREPORT
+nonworkingTable=NONWORKINGDAYS_TBL
+This is the database setting to connect DB2 Server.
+#for file
+tempfilepath=define your desired location to export excel file (Have to manually create new folder E.g. C:\\Users\\James\\Document\\SSReportExcel)
+filename=give your desired file name for excel(The system will export excel like SSREPORT.xlsx)
+#for email
+email.toMail=to mail address you want to send
+email.from=your mail address
+email.username=your mail address username
+email.password=your mail address password (It must be encrypted value)
+email.host=your mail host
+email.port=your mail port
+email.subject=define your mail subject
+email.content=define your mail title (It will appear as large title in your mail content)
+#Log4j
+scan_log4jFilePath=/properties/log4j_config.properties
+#format
+duration=dd HH:mm (the desired format for 'Duration' column of excel E.g. you can change this like dd:HH:mm)
+reportdateformat=ddMMYYYY (the desired format for 'Report Date' column of excel E.g. you can change this like YYYYMMdd)
+reporttimeformat=hh:mm (the desired format for 'Report Time' column of excel E.g. you can change this like HH:mm)
+reportmonth=11 (this is the report month duration which will be counted backforward from last month)
+E.g. your current month is december and when you define 2, the system will retrieve and report between November and October)

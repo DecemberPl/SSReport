@@ -1,0 +1,87 @@
+package com.startinpoint.ssreport.daoImpl;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
+import com.startinpoint.ssreport.dao.SSReportDao;
+import com.startinpoint.ssreport.main.Constants;
+import com.startinpoint.ssreport.main.ReadPropertiesFile;
+import com.startinpoint.ssreport.service.DB2Connection;
+import com.startinpoint.ssreport.entity.SSReport;
+
+public class SSReportDaoImpl implements SSReportDao{
+
+	DB2Connection db2Connection;
+	Properties p=ReadPropertiesFile.initialAppConfig();
+	List<SSReport> ssReportList=new ArrayList<>();
+	@Override
+	public List<Timestamp> getReportMonthsForCalculation() {
+		String reportmonthLength=p.getProperty("reportmonth");  
+		Calendar cal=Calendar.getInstance();
+    	Date date=new Date();
+		System.out.println("Today Date: "+date);
+		cal.setTime(date);
+		cal.add(Calendar.MONTH, -Integer.parseInt(reportmonthLength));
+		cal.set(Calendar.DAY_OF_MONTH, 1);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		Date startDate=cal.getTime();
+		System.out.println("Start Date: "+startDate);
+		Calendar c=Calendar.getInstance();
+		Date d=new Date();
+		c.setTime(d);
+		c.add(Calendar.MONTH, -1);
+		c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+		c.set(Calendar.HOUR_OF_DAY, 23);
+	    c.set(Calendar.MINUTE, 59);
+	    c.set(Calendar.SECOND, 59);
+	    c.set(Calendar.MILLISECOND, 999);
+		Date endDate=c.getTime();
+		System.out.println("End Date: "+endDate);
+		Timestamp ts=new Timestamp(date.getTime());  
+        System.out.println("Today Date (Timestamp): "+ts);
+        Timestamp ts1=new Timestamp(startDate.getTime());  
+        System.out.println("Start Date (Timestamp): "+ts1);
+        Timestamp ts2=new Timestamp(endDate.getTime());
+        System.out.println("End Date (Timestamp): "+ts2);
+        List<Timestamp> timestampList=new ArrayList<Timestamp>();
+        timestampList.add(ts);
+        timestampList.add(ts1);
+        timestampList.add(ts2);
+        return timestampList;
+	}
+	@Override
+	public List<SSReport> getData() {
+		try(Connection con=db2Connection.getInstance().getConnection()){
+			SSReport ssReport;
+		 List<Timestamp> tsList=new ArrayList<Timestamp>();
+		 tsList=getReportMonthsForCalculation();
+		 Timestamp tsStart=tsList.get(1);
+		 Timestamp tsEnd=tsList.get(2);
+		 String sql="SELECT "+Constants.reportNameDB+", "+Constants.SSUserDB+", "+Constants.dateStartDB+", "+Constants.dateEndDB+", "+Constants.ssCategoryDB
+				+" FROM "+p.getProperty("username")+"."+p.getProperty("viewname")+" WHERE "+Constants.timestampForSSReportDB+">='"+tsStart+"' AND "+Constants.timestampForSSReportDB+"<='"+tsEnd+"'";
+		 System.out.println(sql);
+		 Statement statement=con.createStatement();
+		 ResultSet rs=statement.executeQuery(sql);
+		 while(rs.next()){
+			 ssReport=new SSReport();
+			 ssReport.setReportName(rs.getString(Constants.reportNameDB));
+			 ssReport.setSssId(rs.getString(Constants.SSUserDB));
+			 ssReport.setSssStart(rs.getString(Constants.dateStartDB));
+			 ssReport.setSssComplete(rs.getString(Constants.dateEndDB));
+			 ssReport.setCategory(rs.getString(Constants.ssCategoryDB));
+			 ssReportList.add(ssReport);
+			 System.out.println("Each SSReport"+ssReport.toString());
+		 }
+		 System.out.println("ssReportList: "+ssReportList);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return ssReportList;
+	}
+}

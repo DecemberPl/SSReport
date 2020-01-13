@@ -1,0 +1,16 @@
+package com.startinpoint.ssreport.main;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import com.startinpoint.ssreport.service.DB2Connection;
+
+public class SSReportMain {
+
+	public static void main(String[] args) throws SQLException {
+		// TODO Auto-generated method stub
+		System.out.println("in ssreport main");
+		Connection  con = DB2Connection.getInstance().getConnection();
+		System.out.println(con.isClosed());
+	}
+}

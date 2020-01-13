@@ -1,0 +1,11 @@
+package com.startinpoint.ssreport.dao;
+
+import java.util.List;
+
+import com.startinpoint.ssreport.entity.SSReport;
+
+public interface SSReportDao {
+	
+	public List<SSReport> getData();
+
+}

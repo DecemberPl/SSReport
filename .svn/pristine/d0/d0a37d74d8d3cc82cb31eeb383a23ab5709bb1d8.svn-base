@@ -1,0 +1,100 @@
+package com.startinpoint.ssreport.entity;
+
+public class SSReport {
+	String reportName;
+	String reportDate;
+	String reportTime;
+	String sssId;
+	String sssStart;
+	String sssComplete;
+	String duration;
+	String category;
+	String remarks;
+	public String getReportName() {
+		return reportName;
+	}
+	public void setReportName(String reportName) {
+		this.reportName = reportName;
+	}
+	public String getReportDate() {
+		return reportDate;
+	}
+	public void setReportDate(String reportDate) {
+		this.reportDate = reportDate;
+	}
+	public String getReportTime() {
+		return reportTime;
+	}
+	public void setReportTime(String reportTime) {
+		this.reportTime = reportTime;
+	}
+	public String getSssId() {
+		return sssId;
+	}
+	public void setSssId(String sssId) {
+		this.sssId = sssId;
+	}
+	public String getSssStart() {
+		return sssStart;
+	}
+	public void setSssStart(String sssStart) {
+		this.sssStart = sssStart;
+	}
+	public String getSssComplete() {
+		return sssComplete;
+	}
+	public void setSssComplete(String sssComplete) {
+		this.sssComplete = sssComplete;
+	}
+	public String getDuration() {
+		return duration;
+	}
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+	public String getCategory() {
+		return category;
+	}
+	public void setCategory(String category) {
+		this.category = category;
+	}
+	public String getRemarks() {
+		return remarks;
+	}
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+	public SSReport(String reportName, String reportDate, String reportTime, String sssId, String sssStart,
+			String sssComplete, String duration, String category, String remarks) {
+		super();
+		this.reportName = reportName;
+		this.reportDate = reportDate;
+		this.reportTime = reportTime;
+		this.sssId = sssId;
+		this.sssStart = sssStart;
+		this.sssComplete = sssComplete;
+		this.duration = duration;
+		this.category = category;
+		this.remarks = remarks;
+	}
+	public SSReport() {
+		super();
+	}
+	public SSReport(String reportName, String sssId, String sssStart, String sssComplete, String category,
+			String remarks) {
+		super();
+		this.reportName = reportName;
+		this.sssId = sssId;
+		this.sssStart = sssStart;
+		this.sssComplete = sssComplete;
+		this.category = category;
+		this.remarks = remarks;
+	}
+	@Override
+	public String toString() {
+		return "SSReport [reportName=" + reportName + ", reportDate=" + reportDate + ", reportTime=" + reportTime
+				+ ", sssId=" + sssId + ", sssStart=" + sssStart + ", sssComplete=" + sssComplete + ", duration="
+				+ duration + ", category=" + category + ", remarks=" + remarks + "]";
+	}
+	
+}

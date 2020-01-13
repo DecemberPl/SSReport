@@ -1,0 +1,43 @@
+package com.startinpoint.ssreport.main;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.startinpoint.ssreport.dao.SSReportDao;
+import com.startinpoint.ssreport.daoImpl.SSReportDaoImpl;
+import com.startinpoint.ssreport.entity.SSReport;
+import com.startinpoint.ssreport.service.DB2Connection;
+import com.startinpoint.ssreport.service.ExportExcelReportService;
+import com.startinpoint.ssreport.service.SendEmailService;
+import com.startinpoint.ssreport.serviceImpl.ExportExcelReportServiceImpl;
+import com.startinpoint.ssreport.serviceImpl.SendEmailServiceImpl;
+public class SSReportMain {
+
+	public static void main(String[] args) throws SQLException, IOException {
+		Logger debugLog = Logger.getLogger("debug.logger");
+		System.out.println("in SSReport Main");
+		debugLog.debug("in SSReport Main");
+		ReadPropertiesFile.initialAppConfig();
+		//to get Connection
+		Connection  con = DB2Connection.getInstance().getConnection();
+		//to get DB2 Data
+		SSReportDao ss=new SSReportDaoImpl();
+		//to edit in order to export data
+		List<SSReport> prepareList=new ArrayList<SSReport>();
+		prepareList=ss.getData();
+		ExportExcelReportService exportExcel=new ExportExcelReportServiceImpl();
+		prepareList=(List<SSReport>) exportExcel.PrepareDataToWrite(prepareList);
+		//to export excel sheet
+		String exportExcelStatus=exportExcel.exportExcel(ReadPropertiesFile.TEMPFILEPATH, ReadPropertiesFile.FILENAME,prepareList);
+		System.out.println("Export Condition: "+exportExcelStatus);
+		debugLog.debug("Export Condition"+exportExcelStatus);
+		SendEmailService emailService=new SendEmailServiceImpl();
+	    emailService.sendMail(ReadPropertiesFile.TOEMAIL, ReadPropertiesFile.FROM, ReadPropertiesFile.EMAILPASSWORD,ReadPropertiesFile.HOST,ReadPropertiesFile.PORT,ReadPropertiesFile.FILENAME, ReadPropertiesFile.TEMPFILEPATH,ReadPropertiesFile.SUBJECT, ReadPropertiesFile.CONTENT);
+		System.out.println(con.isClosed());
+	}
+}
